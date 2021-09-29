@@ -2,15 +2,21 @@ FIND_PACKAGE(Threads)
 
 find_path(SDL_GPU_INCLUDE_DIR
     SDL_gpu.h
-    PATHS  ../../vendor/sdl-gpu/build/build-$ENV{TARGET} ../../vendor/sdl-gpu/build/build-$ENV{TARGET}/SDL_gpu$ENV{COMPILER}/ /usr /usr/local /opt /opt/local /Library/Frameworks ~/Library/Frameworks
+    PATHS  ../../vendor/sdl-gpu/build/build-$ENV{TARGET}
+           ../../vendor/sdl-gpu/build/build-$ENV{TARGET}/SDL_gpu$ENV{COMPILER}/
+           ../../vendor/sdl-gpu/SDL_gpu/include/
+           /usr /usr/local /opt /opt/local /Library/Frameworks ~/Library/Frameworks
     HINTS $ENV{SDL2GPUDIR}
-	PATH_SUFFIXES include/ include/SDL2/ include/SDL_gpu SDL2 SDL_gpu
-	NO_CMAKE_FIND_ROOT_PATH)
+    PATH_SUFFIXES include/ include/SDL2/ include/SDL_gpu SDL2 SDL_gpu
+    NO_CMAKE_FIND_ROOT_PATH)
 
 find_library(SDL_GPU_LIBRARY
     NAMES SDL2_gpu libSDL2_gpu.dll.a
     HINTS $ENV{SDL2GPUDIR}
-    PATHS ../../vendor/sdl-gpu/build/build-$ENV{TARGET}/ ../../vendor/sdl-gpu/build/build-$ENV{TARGET}/SDL_gpu$ENV{COMPILER}/ /usr/local/lib/ /usr/$ENV{TARGET}/ 
+    PATHS ../../vendor/sdl-gpu/build/build-$ENV{TARGET}/
+          ../../vendor/sdl-gpu/build/build-$ENV{TARGET}/SDL_gpu$ENV{COMPILER}/
+          ../../vendor/sdl-gpu/SDL_gpu/lib/
+          /usr/local/lib/ /usr/$ENV{TARGET}/
     PATH_SUFFIXES lib/ lib64/ bin/
     NO_CMAKE_FIND_ROOT_PATH)
 
