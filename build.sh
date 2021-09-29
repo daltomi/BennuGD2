@@ -39,7 +39,7 @@ function check_if_exist_sdl_gpu {
     fi
 }
 
-function check_if_exit_cmd {
+function check_if_exist_cmd {
     command -v "$1" 1>/dev/null
     if [ $? -eq "$EXIT_FAILURE" ]; then
         echo "Program '$1' not found."
@@ -48,8 +48,8 @@ function check_if_exit_cmd {
     return "$EXIT_SUCCESS"
 }
 
-function exit_if_not_exits_cmd {
-    check_if_exit_cmd "$1"
+function exit_if_not_exist_cmd {
+    check_if_exist_cmd "$1"
     if [ $? -eq "$EXIT_FAILURE" ]; then
         exit "$EXIT_FAILURE"
     fi
@@ -62,18 +62,18 @@ function exit_bad_option_argv {
 }
 
 function prologue_build_tools {
-    exit_if_not_exits_cmd "git"
-    exit_if_not_exits_cmd "make"
-    exit_if_not_exits_cmd "cmake"
-    check_if_exit_cmd "gcc"
+    exit_if_not_exist_cmd "git"
+    exit_if_not_exist_cmd "make"
+    exit_if_not_exist_cmd "cmake"
+    check_if_exist_cmd "gcc"
     if [ $? -eq "$EXIT_FAILURE" ]; then
-        exit_if_not_exits_cmd "clang"
+        exit_if_not_exist_cmd "clang"
     fi
 }
 
 function prologue_argv {
     case "$1" in
-        "scan") SCAN_BUILD="scan-build"; exit_if_not_exits_cmd "$SCAN_BUILD";;
+        "scan") SCAN_BUILD="scan-build"; exit_if_not_exist_cmd "$SCAN_BUILD";;
         "submodules") return "$EXIT_SUCCESS";;
         "clean") return "$EXIT_SUCCESS";;
         "release") BUILD_TYPE=Release;;
@@ -116,8 +116,8 @@ if [ "$1" == "package" ]; then
         exit "$EXIT_FAILURE"
     fi
 
-    exit_if_not_exits_cmd "tar"
-    exit_if_not_exits_cmd "xz"
+    exit_if_not_exist_cmd "tar"
+    exit_if_not_exist_cmd "xz"
 
     check_if_exist_sdl_gpu
 
