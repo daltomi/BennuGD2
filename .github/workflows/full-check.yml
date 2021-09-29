@@ -1,0 +1,26 @@
+name: full-check
+
+on: [push, pull_request]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: install_dependencies
+      run: |
+           sudo apt update --fix-missing
+           sudo apt install pkg-config git libvlc-dev libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-gfx-dev libsdl2-ttf-dev libsdl2-net-dev make coreutils tar
+    - name: first_build
+      run: |
+           ./build.sh submodules || exit 1
+           ./build.sh || exit 1
+    - name: run_program
+      run: |
+           export MY_BENNUGD_LIBS=$(pwd)/build/linux/bin
+           export MY_BENNUGD_BINS=$(pwd)/build/linux/bin
+           ./bennugd.sh -c
+           ./build.sh package
+
