@@ -29,6 +29,9 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$YOU_BENNUGD_LIBS
 
 export PATH=$PATH:$YOU_BENNUGD_BINS
 
+EXIT_FAILURE=1
+EXIT_SUCCESS=0
+
 function help() {
     echo "====================="
     echo "Usage: bennugd [OPTIONS] [FILE.PRG]"
@@ -37,6 +40,7 @@ function help() {
     echo "  -c   compiler"
     echo "  -s   moddesc"
     echo "  -g   run gdb"
+    echo "  -v   run valgrind"
     echo "  -h   show help"
     echo
     echo " Examples:"
@@ -46,14 +50,32 @@ function help() {
     echo " bennugd -i mygame.dcb          (interpreter)"
     echo " bennugd -g -c file.prg         (run gdb with bgdc)"
     echo " bennugd -g -i mygame.dcb       (run gdb with bgdi)"
+    echo " bennugd -v -c file.prg         (run valgrind with bgdc)"
+    echo " bennugd -v -i mygame.dcb       (run valgrind with bgdi)"
     echo "====================="
-    exit 1
+    exit "$EXIT_FAILURE"
 }
 
 function check_exist {
     if [ ! -e "$1" ]; then
         echo "$2" "$1"
-        exit 1;
+        exit "$EXIT_FAILURE";
+    fi
+}
+
+function check_if_exist_cmd {
+    command -v "$1" 1>/dev/null
+    if [ $? -eq "$EXIT_FAILURE" ]; then
+        echo "Program '$1' not found."
+        return "$EXIT_FAILURE"
+    fi
+    return "$EXIT_SUCCESS"
+}
+
+function exit_if_not_exist_cmd {
+    check_if_exist_cmd "$1"
+    if [ $? -eq "$EXIT_FAILURE" ]; then
+        exit "$EXIT_FAILURE"
     fi
 }
 
@@ -81,11 +103,12 @@ function is_valid_option {
         "-c") BIN_SELECT="bgdc";;
         "-i") BIN_SELECT="bgdi";;
         "-s") BIN_SELECT="moddesc";;
-        "-g") return 1;;
+        "-g") return "$EXIT_SUCCESS";;
+        "-v") return "$EXIT_SUCCESS";;
         "-h") help;;
-        *) return 0
+        *) return "$EXIT_FAILURE";;
     esac
-    return 1
+    return "$EXIT_SUCCESS"
 }
 
 #========== M A I N ==========#
@@ -95,20 +118,26 @@ check_exist "$YOU_BENNUGD_BINS" "Directory not found: "
 
 
 function check_gdb {
-    command -v gdb 1>/dev/null
-    if [ $? -eq 1 ]; then
-        echo "Command gdb not found."
-        exit 1
-    fi
+    exit_if_not_exist_cmd "gdb"
 
     is_valid_option "$1"
 
-    if [ $? -eq 0 ]; then
+    if [ $? -eq "$EXIT_FAILURE" ]; then
         echo "The -g option requires a valid parameter."
-        exit 1
+        exit "$EXIT_FAILURE"
     fi
 }
 
+function check_valgrind {
+    exit_if_not_exist_cmd "valgrind"
+
+    is_valid_option "$1"
+
+    if [ $? -eq "$EXIT_FAILURE" ]; then
+        echo "The -v option requires a valid parameter."
+        exit "$EXIT_FAILURE"
+    fi
+}
 
 if [ "$#" -eq 0 ]; then
     help 
@@ -120,9 +149,12 @@ if [ "$#" -eq 1 ]; then
     if [ "$1" == "-g" ]; then
         check_gdb "$2"
     fi
+    if [ "$1" == "-v" ]; then
+        check_valgrind "$2"
+    fi
 
     is_valid_option "$1"
-    if [ $? -eq 1 ]; then
+    if [ $? -eq "$EXIT_SUCCESS" ]; then
         "$BIN_SELECT"
     else
         if [ "${1##*.}" == "prg" ]; then
@@ -132,12 +164,18 @@ if [ "$#" -eq 1 ]; then
     fi
 else
     is_valid_option "$1"
-    if [ $? -eq 1 ]; then
+    if [ $? -eq "$EXIT_SUCCESS" ]; then
         if [ "$1" == "-g" ]; then
             check_gdb "$2"
             shift 2
             gdb --args "$BIN_SELECT" "$@"
-            exit 0
+            exit $?
+        fi
+        if [ "$1" == "-v" ]; then
+            check_valgrind "$2"
+            shift 2
+            valgrind "$BIN_SELECT" "$@"
+            exit $?
         fi
         shift
         "$BIN_SELECT" "$@"
@@ -146,4 +184,4 @@ else
     fi
 fi
 
-exit 0
+exit "$EXIT_SUCCESS"
