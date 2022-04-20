@@ -1,9 +1,7 @@
-## BennuGD2 - Mirror Branch for GNU/Linux only - Unstable
+## BennuGD2 - Branch for GNU/Linux only - Unstable
 
 
-https://bitbucket.org/SplinterGU/bennugd2
-
-https://www.bennugd.org/
+Upstream: https://github.com/SplinterGU/bennugd2
 
 
 
